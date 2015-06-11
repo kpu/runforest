@@ -1,6 +1,6 @@
 # runforest
 
-A python library that manages and runs experimental pipelines.  Pipeline steps can take a long time to run, so it is important to save output in files.  However, pipelines change constantly and it is hard to keep track of the correct files to use.  Moreover, there can be multiple versions of the same output, corresponding to slighly different pipelines or different configurations.  This library uses hashing: the input files and command lines are hashed together and outputs are stored in a directory named after the hash.  
+A python library that manages and runs experimental pipelines.  Pipeline steps can take a long time to run, so it is important to save output in files.  However, pipelines change constantly and it is hard to keep track of the correct files to use.  Moreover, there can be multiple versions of the same output, corresponding to slighly different pipelines or different configurations.  This library uses hashing: the input files and command lines are hashed together and outputs are stored in a directory named after the hash.
 
 ## API
 
@@ -14,7 +14,7 @@ This creates a task with the command line
 ```bash
 sort text
 ```
-and captures its stdout.  The `Input("text")` code annotates `text` as a file, so content matters rather than its name.  
+and captures its stdout.  The `Input("text")` code annotates `text` as a file, so content matters rather than its name.
 
 Pipeline steps can use the output from another step:
 ```python
