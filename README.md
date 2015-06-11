@@ -8,7 +8,7 @@ A python library that manages and runs experimental pipelines.  Pipeline steps c
 
 Pipeline steps are shell commands constructed by calling the `stdout` or `step` function with command-line arguments.
 ```python
-stdout("sort", Input("text"))
+stdout("sort", Input("text"), name="sort")
 ```
 This creates a task with the command line
 ```bash
@@ -18,13 +18,13 @@ and captures its stdout.  The `Input("text")` code annotates `text` as a file, s
 
 Pipeline steps can use the output from another step:
 ```python
-sorted_text = stdout("sort", Input("text"))
-unique_text = stdout("uniq", sorted_text)
+sorted_text = stdout("sort", Input("text"), name="sort")
+unique_text = stdout("uniq", sorted_text, name="uniq")
 ```
 
 The more-general `step` function allows multiple outputs, returning them in the same order as they were specified.
 ```python
-(sort, uniq) = step("sort", Input("text"), "|tee", Output("sorted"), "|uniq >", Output("unique"))
+(sort, uniq) = step("sort", Input("text"), "|tee", Output("sorted"), "|uniq >", Output("unique"), name="sortuniq")
 ```
 
 ### Running pipelines
