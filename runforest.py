@@ -96,10 +96,9 @@ class Input(Argument):
     if stat.st_size < 1048576:
       """Content-based hash for small files."""
       h = hashlib.sha256()
-      opened = open(name, 'rb')
-      #TODO: stream this
-      h.update(opened.read(stat.st_size))
-      opened.close()
+      with open(name, 'rb') as opened:
+        #TODO: stream this
+        h.update(opened.read(stat.st_size))
       self.hash = h.digest()
     else:
       """Metadata hash for large files."""
@@ -251,7 +250,7 @@ class Task:
      The arguments are hashed in order to form the
      task's hash (except any wrapped with Irrelevant)."""
 
-  def __init__(self, *arguments, name = ""):
+  def __init__(self, name, *arguments):
     self.args = ArgumentList(arguments)
     self.inputs = []
     self.outputs = []
@@ -292,7 +291,7 @@ class Task:
 
   def directory(self):
     """Subdirectory where the task will run, excluding the working directory."""
-    return binascii.hexlify(self.hash).decode('UTF-8')
+    return self.name
 
   def command(self, base):
     """Shell command to run for this task.  base is the base working directory."""
@@ -328,7 +327,7 @@ class Task:
   def distinguished_name(self, delim = ''):
     """name plus some of the hash for use like a git revision."""
     code = binascii.hexlify(self.hash).decode('UTF-8')[0:6]
-    return code + delim + self.name
+    return self.name + delim + code
 
 class LockedSet:
   """Wrapper around a set() with a lock and atomic move."""
@@ -541,15 +540,13 @@ class MissingTaskName(Exception):
   """Thrown if a task is given without a name."""
   pass
 
-def step(*args, name):
+def step(name, *args):
   """Convenience function: construct a task and return its output.
      For example:
        tokenized = step("tokenizer.perl -l en <", text, ">", Output())
      Throws an exception if the task does not have exactly one output.
   """
-  if (name is None or name == ""):
-    raise MissingTaskName()
-  return Task(*args, name = name).outputs
+  return Task(name, *args).outputs
 
 class NotOneOutput(Exception):
   """Thrown if one calls step with a different number of outputs than 1.
@@ -558,10 +555,10 @@ class NotOneOutput(Exception):
   """
   pass
 
-def stdout(*args, name):
+def stdout(name, *args):
   """Run a task and return its stdout."""
   to_star = args + (">", Output())
-  outputs = step(*to_star, name = name)
+  outputs = step(name, *to_star)
   if len(outputs) != 1:
     raise NotOneOutput()
   return outputs[0]
